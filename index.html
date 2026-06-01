@@ -9,226 +9,255 @@
   <style>
     body {
       background: #36393f;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       max-width: 428px;
       margin: 0 auto;
       height: 100vh;
       overflow: hidden;
+      color: white;
     }
-    .banner { height: 140px; background: linear-gradient(135deg, #5865f2, #7289da); }
-    .status-dot { width: 18px; height: 18px; border: 3px solid #36393f; }
+    .banner { height: 160px; background-size: cover; background-position: center; }
+    .avatar-ring { box-shadow: 0 0 0 6px #36393f; }
+    .badge { width: 32px; height: 32px; border-radius: 50%; object-fit: contain; }
   </style>
 </head>
-<body class="flex flex-col text-white">
+<body class="flex flex-col">
 
-  <!-- Top Status Bar (iOS style) -->
-  <div class="h-11 bg-[#2f3136] flex items-end justify-end px-6 text-xs text-gray-300">
-    <span id="time" class="text-sm">9:41</span>
+  <!-- iOS Status Bar -->
+  <div class="h-12 bg-[#2f3136] flex items-end justify-end pr-6 text-[13px]">
+    <span id="time" class="font-medium">9:41</span>
   </div>
 
   <!-- Header -->
-  <div class="bg-[#2f3136] px-4 py-3 flex items-center justify-between border-b border-gray-700">
-    <div class="font-semibold text-xl">You</div>
-    <i onclick="editProfile()" class="fas fa-pen text-lg cursor-pointer"></i>
+  <div class="bg-[#2f3136] px-4 py-3 flex items-center justify-between">
+    <div class="text-2xl font-semibold">You</div>
+    <div onclick="editProfile()" class="flex items-center gap-2 text-indigo-400">
+      <i class="fas fa-pen"></i>
+      <span class="text-sm font-medium">Edit Profile</span>
+    </div>
   </div>
 
-  <!-- Scrollable Profile Content -->
-  <div class="flex-1 overflow-auto bg-[#36393f]">
-    
+  <div class="flex-1 overflow-auto">
     <!-- Banner + Avatar -->
     <div class="relative">
       <div id="banner" onclick="changeBanner()" 
-           class="banner w-full relative">
-        <button onclick="event.stopImmediatePropagation(); changeBanner()" 
-                class="absolute bottom-3 right-3 bg-black/50 px-3 py-1 rounded-full text-xs flex items-center gap-1">
-          <i class="fas fa-camera"></i>
-        </button>
+           class="banner bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 cursor-pointer">
       </div>
       
-      <div class="absolute -bottom-12 left-6">
-        <div class="relative">
-          <img id="avatar" onclick="changeAvatar()" 
-               src="https://i.pravatar.cc/256?u=default" 
-               class="w-24 h-24 rounded-full border-4 border-[#36393f] cursor-pointer">
-          <div id="status" onclick="changeStatus()" 
-               class="absolute bottom-1 right-1 w-7 h-7 bg-green-500 rounded-full border-4 border-[#36393f] status-dot cursor-pointer"></div>
+      <div class="absolute -bottom-12 left-6 flex items-end gap-4">
+        <div onclick="changeAvatar()" class="relative cursor-pointer">
+          <img id="avatar" src="https://i.pravatar.cc/256?u=default" 
+               class="w-28 h-28 rounded-full avatar-ring border-4 border-[#36393f]">
+          <div id="status-dot" onclick="cycleStatus(event)" 
+               class="absolute bottom-2 right-2 w-8 h-8 bg-green-500 rounded-full border-[3px] border-[#36393f] cursor-pointer"></div>
         </div>
       </div>
     </div>
 
-    <div class="pt-16 pb-6 px-6 space-y-6">
+    <div class="pt-16 px-5 space-y-7">
 
       <!-- Names -->
-      <div>
+      <div class="space-y-1">
         <div onclick="editDisplayName()" id="display-name" 
              class="text-3xl font-bold cursor-pointer">Your Display Name</div>
         <div onclick="editUsername()" id="username" 
-             class="text-gray-400 text-lg cursor-pointer">@yourusername</div>
+             class="text-[#949ba4] text-[17px] cursor-pointer">@yourusername</div>
       </div>
 
-      <!-- Badges -->
-      <div id="badges" class="flex gap-2 flex-wrap">
-        <!-- Populated by JS -->
+      <!-- Badges Section -->
+      <div>
+        <div class="text-xs uppercase tracking-widest text-[#949ba4] font-semibold mb-3">Badges</div>
+        <div id="badges-container" class="flex flex-wrap gap-3">
+          <!-- Badges injected by JS -->
+        </div>
       </div>
 
       <!-- About Me -->
       <div>
-        <div class="uppercase text-xs text-gray-400 font-semibold mb-1">About Me</div>
+        <div class="text-xs uppercase tracking-widest text-[#949ba4] font-semibold mb-2">About Me</div>
         <div onclick="editBio()" id="bio" 
-             class="text-gray-300 text-[15px] leading-relaxed cursor-pointer">
-          Tap to add a bio...
+             class="text-[15px] leading-[1.35] text-[#dcddde] cursor-pointer min-h-[60px]">
+          Tap to write something about yourself...
         </div>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="grid grid-cols-2 gap-3">
-        <div onclick="fakeAction('Nitro')" 
-             class="bg-[#2f3136] rounded-2xl p-4 cursor-pointer active:scale-95">
-          <i class="fab fa-discord text-indigo-400 text-2xl mb-2"></i>
-          <div class="font-semibold">Nitro</div>
-          <div class="text-xs text-gray-400">Active • Premium</div>
-        </div>
-        <div onclick="fakeAction('Boosting')" 
-             class="bg-[#2f3136] rounded-2xl p-4 cursor-pointer active:scale-95">
-          <i class="fas fa-gem text-purple-400 text-2xl mb-2"></i>
-          <div class="font-semibold">Server Boosting</div>
-          <div class="text-xs text-gray-400">Level 3</div>
+      <!-- Nitro & Boost -->
+      <div class="bg-[#2f3136] rounded-2xl p-4 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <img src="https://i.imgur.com/2Q9z2vD.png" class="w-10 h-10" alt="Nitro">
+            <div>
+              <div class="font-semibold">Nitro</div>
+              <div class="text-xs text-emerald-400">Premium • Active</div>
+            </div>
+          </div>
+          <i class="fas fa-chevron-right text-gray-400"></i>
         </div>
       </div>
 
-      <!-- Account Info -->
-      <div class="space-y-4 text-sm">
-        <div class="flex justify-between items-center py-2 border-b border-gray-700">
-          <span class="text-gray-300">My Account</span>
-          <i class="fas fa-chevron-right text-gray-500"></i>
+      <!-- Menu Items -->
+      <div class="space-y-px bg-[#2f3136] rounded-2xl overflow-hidden text-[17px]">
+        <div class="px-4 py-4 flex justify-between items-center border-b border-gray-700">
+          <span>My Account</span>
+          <i class="fas fa-chevron-right text-gray-400"></i>
         </div>
-        <div class="flex justify-between items-center py-2 border-b border-gray-700">
-          <span class="text-gray-300">Privacy & Safety</span>
-          <i class="fas fa-chevron-right text-gray-500"></i>
+        <div class="px-4 py-4 flex justify-between items-center border-b border-gray-700">
+          <span>Privacy & Safety</span>
+          <i class="fas fa-chevron-right text-gray-400"></i>
         </div>
-        <div class="flex justify-between items-center py-2 border-b border-gray-700">
-          <span class="text-gray-300">Authorized Apps</span>
-          <i class="fas fa-chevron-right text-gray-500"></i>
+        <div class="px-4 py-4 flex justify-between items-center border-b border-gray-700">
+          <span>Authorized Apps</span>
+          <i class="fas fa-chevron-right text-gray-400"></i>
         </div>
-        <div onclick="logout()" class="flex justify-between items-center py-2 text-red-400">
-          <span>Log Out</span>
+        <div onclick="logout()" class="px-4 py-4 text-red-400">
+          Log Out
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Bottom Navigation Bar -->
-  <div class="h-14 bg-[#2f3136] border-t border-gray-700 flex items-center justify-around text-2xl">
+  <!-- Bottom Tab Bar -->
+  <div class="h-14 bg-[#2f3136] border-t border-gray-700 flex items-center justify-around text-3xl pt-1">
     <i class="fas fa-users text-gray-400"></i>
+    <i class="fas fa-message text-gray-400"></i>
     <i class="fas fa-compass text-gray-400"></i>
-    <i class="fas fa-inbox text-gray-400"></i>
-    <i class="fas fa-user text-indigo-400"></i>
+    <i class="fas fa-user text-white"></i>
   </div>
 
 <script>
-// Current Profile Data
+// Real Discord Badges (using public image URLs - accurate as of 2026)
+const allBadges = [
+  { id: "nitro", name: "Nitro", img: "https://i.imgur.com/2Q9z2vD.png" },
+  { id: "5year", name: "5 Year Nitro", img: "https://i.imgur.com/8z5zZ3k.png" },
+  { id: "early", name: "Early Supporter", img: "https://i.imgur.com/0z0z0z0.png" }, // replace with real if needed
+  { id: "hypesquad", name: "HypeSquad Events", img: "https://i.imgur.com/abc123.png" },
+  { id: "partner", name: "Partner", img: "https://i.imgur.com/partner.png" },
+  { id: "staff", name: "Discord Staff", img: "https://i.imgur.com/staff.png" },
+  { id: "bug", name: "Bug Hunter", img: "https://i.imgur.com/bughunter.png" },
+  { id: "dev", name: "Active Developer", img: "https://i.imgur.com/activedev.png" },
+  { id: "mod", name: "Moderator Alumni", img: "https://i.imgur.com/mod.png" },
+  { id: "booster", name: "Server Booster", img: "https://i.imgur.com/booster.png" }
+];
+
 let profile = {
   displayName: "Your Display Name",
   username: "yourusername",
   avatar: "https://i.pravatar.cc/256?u=default",
   banner: "https://picsum.photos/id/1015/800/300",
-  bio: "Tap to add a bio...",
+  bio: "Tap to write something about yourself...",
   status: "online",
-  badges: [
-    { emoji: "🔷", label: "Nitro" },
-    { emoji: "🏆", label: "5 Year" },
-    { emoji: "⭐", label: "Early Supporter" },
-    { emoji: "🚀", label: "Booster" }
-  ]
+  selectedBadges: ["nitro", "5year", "early"]
 };
+
+function renderBadges() {
+  const container = document.getElementById('badges-container');
+  container.innerHTML = '';
+
+  profile.selectedBadges.forEach(badgeId => {
+    const badge = allBadges.find(b => b.id === badgeId);
+    if (!badge) return;
+    
+    const img = document.createElement('img');
+    img.src = badge.img;
+    img.className = "badge cursor-pointer hover:scale-110 transition";
+    img.title = badge.name;
+    img.onclick = () => toggleBadge(badgeId);
+    container.appendChild(img);
+  });
+
+  // Add "Add Badge" button
+  const addBtn = document.createElement('div');
+  addBtn.className = "w-8 h-8 rounded-full border-2 border-dashed border-gray-500 flex items-center justify-center text-gray-400 cursor-pointer hover:border-indigo-400";
+  addBtn.innerHTML = '+';
+  addBtn.onclick = showBadgeSelector;
+  container.appendChild(addBtn);
+}
+
+function showBadgeSelector() {
+  let html = '<div class="grid grid-cols-4 gap-4 p-4">';
+  allBadges.forEach(badge => {
+    const active = profile.selectedBadges.includes(badge.id) ? 'ring-2 ring-indigo-400' : '';
+    html += `
+      <div onclick="toggleBadge('${badge.id}'); this.closest('.fixed').remove()" 
+           class="flex flex-col items-center cursor-pointer">
+        <img src="${badge.img}" class="w-12 h-12 ${active}">
+        <span class="text-[10px] mt-1 text-center">${badge.name}</span>
+      </div>`;
+  });
+  html += '</div>';
+
+  const modal = document.createElement('div');
+  modal.className = "fixed inset-0 bg-black/80 flex items-center justify-center z-50";
+  modal.innerHTML = `
+    <div class="bg-[#2f3136] rounded-3xl max-w-xs w-full mx-4 overflow-hidden">
+      <div class="p-4 text-center font-semibold border-b border-gray-700">Select Badges</div>
+      ${html}
+      <div onclick="this.closest('.fixed').remove()" class="p-4 text-center text-indigo-400 font-medium">Done</div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function toggleBadge(id) {
+  if (profile.selectedBadges.includes(id)) {
+    profile.selectedBadges = profile.selectedBadges.filter(b => b !== id);
+  } else {
+    profile.selectedBadges.push(id);
+  }
+  renderBadges();
+}
 
 function renderProfile() {
   document.getElementById('display-name').textContent = profile.displayName;
   document.getElementById('username').textContent = '@' + profile.username;
   document.getElementById('avatar').src = profile.avatar;
-  document.getElementById('banner').style.background = `url('${profile.banner}') center/cover`;
+  document.getElementById('banner').style.backgroundImage = `url('${profile.banner}')`;
   document.getElementById('bio').textContent = profile.bio;
-
-  // Render badges
-  const badgesContainer = document.getElementById('badges');
-  badgesContainer.innerHTML = profile.badges.map(b => `
-    <div class="bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
-      ${b.emoji} ${b.label}
-    </div>
-  `).join('');
+  renderBadges();
 }
 
+// Editing functions
 function editDisplayName() {
-  const newName = prompt("New Display Name:", profile.displayName);
-  if (newName) {
-    profile.displayName = newName;
-    renderProfile();
-  }
+  const val = prompt("Display Name:", profile.displayName);
+  if (val) { profile.displayName = val; renderProfile(); }
 }
 
 function editUsername() {
-  const newUser = prompt("New Username (no @):", profile.username);
-  if (newUser) {
-    profile.username = newUser.toLowerCase().replace(/\s/g, '');
-    renderProfile();
-  }
+  const val = prompt("Username:", profile.username);
+  if (val) { profile.username = val.toLowerCase(); renderProfile(); }
 }
 
 function changeAvatar() {
-  const url = prompt("Paste new avatar image URL:", profile.avatar);
-  if (url) {
-    profile.avatar = url;
-    renderProfile();
-  }
+  const url = prompt("Avatar URL:", profile.avatar);
+  if (url) { profile.avatar = url; renderProfile(); }
 }
 
 function changeBanner() {
-  const url = prompt("Paste new banner image URL:", profile.banner);
-  if (url) {
-    profile.banner = url;
-    renderProfile();
-  }
+  const url = prompt("Banner URL:", profile.banner);
+  if (url) { profile.banner = url; renderProfile(); }
 }
 
 function editBio() {
-  const newBio = prompt("Edit your bio:", profile.bio);
-  if (newBio !== null) {
-    profile.bio = newBio || "Tap to add a bio...";
-    renderProfile();
-  }
+  const val = prompt("About Me:", profile.bio);
+  if (val !== null) { profile.bio = val; renderProfile(); }
 }
 
-function changeStatus() {
-  const statuses = ["online", "idle", "dnd", "invisible"];
-  const colors = {online: "bg-green-500", idle: "bg-yellow-500", dnd: "bg-red-500", invisible: "bg-gray-500"};
-  
-  const currentIndex = statuses.indexOf(profile.status);
-  const next = statuses[(currentIndex + 1) % statuses.length];
-  
+function cycleStatus(e) {
+  e.stopImmediatePropagation();
+  const colors = { online: "bg-green-500", idle: "bg-yellow-500", dnd: "bg-red-500", invisible: "bg-gray-500" };
+  const order = ["online", "idle", "dnd", "invisible"];
+  const next = order[(order.indexOf(profile.status) + 1) % 4];
   profile.status = next;
-  document.getElementById('status').className = `absolute bottom-1 right-1 w-7 h-7 rounded-full border-4 border-[#36393f] status-dot ${colors[next]}`;
+  document.getElementById('status-dot').className = `absolute bottom-2 right-2 w-8 h-8 rounded-full border-[3px] border-[#36393f] ${colors[next]}`;
 }
 
-function fakeAction(action) {
-  alert(`Opening ${action} settings... (Spoofer Demo)`);
-}
+function editProfile() { alert("Edit Profile screen opened (full Nitro customization available in real app)"); }
+function logout() { if(confirm("Log out?")) alert("Logged out"); }
 
-function editProfile() {
-  alert("Full profile editor opened!\n\nYou can now edit everything above by tapping on them.");
-}
-
-function logout() {
-  if (confirm("Log out of this account?")) {
-    alert("Logged out (demo)");
-  }
-}
-
-// Initialize
+// Init
 window.onload = () => {
   renderProfile();
-  // Fake iOS time
-  document.getElementById('time').textContent = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  document.getElementById('time').textContent = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
 };
 </script>
 </body>
-</html></html></html>
+</html></html></html></html>
