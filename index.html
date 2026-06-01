@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { background: #202225; font-family: system-ui; }
+    .discord-bg { background: #36393f; }
+    .sidebar { background: #2f3136; }
+    .user-bar { background: #292b2f; }
+  </style>
+</head>
+<body class="h-screen flex text-white overflow-hidden">
+
+  <!-- Servers -->
+  <div class="w-16 bg-[#202225] flex flex-col items-center py-3 space-y-3">
+    <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-xl">D</div>
+  </div>
+
+  <!-- Channels -->
+  <div class="w-60 sidebar flex flex-col">
+    <div class="p-3 font-semibold border-b border-gray-700">My Server</div>
+    <div class="flex-1 overflow-auto p-2 text-sm">
+      <div class="px-2 py-1 text-gray-400"># general</div>
+      <div class="px-2 py-1 text-gray-400"># memes</div>
+    </div>
+
+    <!-- Bottom User Bar - This is where you spoof -->
+    <div onclick="editProfile()" id="user-bar" 
+         class="user-bar p-2 flex items-center gap-3 cursor-pointer hover:bg-gray-700">
+      <img id="avatar" src="https://i.pravatar.cc/128?u=you" 
+           class="w-8 h-8 rounded-full">
+      <div class="flex-1 min-w-0">
+        <div id="username" class="font-medium">YourCoolName</div>
+        <div id="discriminator" class="text-xs text-gray-400">#1337</div>
+      </div>
+      <div id="badges" class="flex gap-1"></div>
+      <i class="fas fa-cog text-gray-400"></i>
+    </div>
+  </div>
+
+  <!-- Main Chat -->
+  <div class="flex-1 flex flex-col discord-bg">
+    <div class="h-12 border-b border-gray-700 flex items-center px-4 font-semibold"># general</div>
+    
+    <div class="flex-1 overflow-auto p-4 space-y-6" id="messages"></div>
+
+    <div class="p-4">
+      <input id="msg-input" type="text" 
+             class="w-full bg-[#40444b] rounded-lg px-4 py-3 outline-none"
+             placeholder="Message #general" onkeypress="if(event.key==='Enter') sendMessage()">
+    </div>
+  </div>
+</body>
+
+<script>
+  function addMessage(author, text) {
+    const msg = document.createElement('div');
+    msg.className = "flex gap-4";
+    msg.innerHTML = `
+      <img src="https://i.pravatar.cc/48?u=${author}" class="w-10 h-10 rounded-full">
+      <div>
+        <span class="font-medium">${author}</span>
+        <span class="text-gray-400 text-xs ml-2">Today at 10:00</span>
+        <div class="mt-1">${text}</div>
+      </div>
+    `;
+    document.getElementById('messages').appendChild(msg);
+  }
+
+  window.onload = () => {
+    addMessage("Admin", "Welcome to the server!");
+    addMessage("Friend", "Hey what's up?");
+    addBadge("💎", "Nitro");
+    addBadge("🌟", "HypeSquad");
+  };
+
+  function sendMessage() {
+    const input = document.getElementById('msg-input');
+    if (input.value.trim()) {
+      addMessage(document.getElementById('username').textContent, input.value);
+      input.value = '';
+    }
+  }
+
+  function editProfile() {
+    let name = prompt("New username:", document.getElementById('username').textContent);
+    if (name) document.getElementById('username').textContent = name;
+
+    let disc = prompt("Discriminator:", document.getElementById('discriminator').textContent);
+    if (disc) document.getElementById('discriminator').textContent = disc;
+
+    let avatar = prompt("Paste avatar image URL:", "");
+    if (avatar) document.getElementById('avatar').src = avatar;
+  }
+
+  function addBadge(emoji, text) {
+    const badges = document.getElementById('badges');
+    const badge = document.createElement('span');
+    badge.className = "text-xs px-1.5 py-0.5 bg-green-600 rounded";
+    badge.textContent = emoji + " " + text;
+    badges.appendChild(badge);
+  }
+</script>
+</html>
