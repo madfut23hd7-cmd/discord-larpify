@@ -16,9 +16,19 @@
       overflow: hidden;
       color: white;
     }
-    .banner { height: 160px; background-size: cover; background-position: center; }
+    .banner { height: 180px; background-size: cover; background-position: center; position: relative; }
+    .banner::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      background: linear-gradient(transparent, #36393f);
+    }
     .avatar-ring { box-shadow: 0 0 0 6px #36393f; }
-    .badge { width: 32px; height: 32px; border-radius: 50%; object-fit: contain; }
+    .badge { width: 32px; height: 32px; border-radius: 50%; object-fit: contain; transition: all 0.2s; }
+    .badge:hover { transform: scale(1.15) rotate(8deg); }
   </style>
 </head>
 <body class="flex flex-col">
@@ -49,49 +59,76 @@
           <img id="avatar" src="https://i.pravatar.cc/256?u=default" 
                class="w-28 h-28 rounded-full avatar-ring border-4 border-[#36393f]">
           <div id="status-dot" onclick="cycleStatus(event)" 
-               class="absolute bottom-2 right-2 w-8 h-8 bg-green-500 rounded-full border-[3px] border-[#36393f] cursor-pointer"></div>
+               class="absolute bottom-2 right-2 w-8 h-8 bg-green-500 rounded-full border-[3.5px] border-[#36393f] cursor-pointer"></div>
         </div>
       </div>
     </div>
 
     <div class="pt-16 px-5 space-y-7">
 
-      <!-- Names -->
+      <!-- Names + Pronouns -->
       <div class="space-y-1">
         <div onclick="editDisplayName()" id="display-name" 
              class="text-3xl font-bold cursor-pointer">Your Display Name</div>
-        <div onclick="editUsername()" id="username" 
-             class="text-[#949ba4] text-[17px] cursor-pointer">@yourusername</div>
+        <div class="flex items-center gap-2">
+          <div onclick="editUsername()" id="username" 
+               class="text-[#949ba4] text-[17px] cursor-pointer">@yourusername</div>
+          <div onclick="editPronouns()" id="pronouns" 
+               class="text-[#949ba4] text-sm cursor-pointer">he/him</div>
+        </div>
       </div>
 
       <!-- Badges Section -->
       <div>
         <div class="text-xs uppercase tracking-widest text-[#949ba4] font-semibold mb-3">Badges</div>
-        <div id="badges-container" class="flex flex-wrap gap-3">
-          <!-- Badges injected by JS -->
-        </div>
+        <div id="badges-container" class="flex flex-wrap gap-3 min-h-[40px]"></div>
       </div>
 
       <!-- About Me -->
       <div>
         <div class="text-xs uppercase tracking-widest text-[#949ba4] font-semibold mb-2">About Me</div>
         <div onclick="editBio()" id="bio" 
-             class="text-[15px] leading-[1.35] text-[#dcddde] cursor-pointer min-h-[60px]">
+             class="text-[15px] leading-[1.35] text-[#dcddde] cursor-pointer min-h-[70px]">
           Tap to write something about yourself...
         </div>
       </div>
 
-      <!-- Nitro & Boost -->
-      <div class="bg-[#2f3136] rounded-2xl p-4 space-y-4">
+      <!-- Joined Date -->
+      <div class="text-sm">
+        <span class="text-[#949ba4]">Joined Discord on </span>
+        <span id="joined-date" class="text-white">March 12, 2022</span>
+      </div>
+
+      <!-- Nitro -->
+      <div onclick="showNitroModal()" class="bg-[#2f3136] rounded-2xl p-4 space-y-4 cursor-pointer hover:bg-[#36393f] transition">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <img src="https://i.imgur.com/2Q9z2vD.png" class="w-10 h-10" alt="Nitro">
             <div>
               <div class="font-semibold">Nitro</div>
-              <div class="text-xs text-emerald-400">Premium • Active</div>
+              <div class="text-xs text-emerald-400">Premium • Active until Dec 2026</div>
             </div>
           </div>
           <i class="fas fa-chevron-right text-gray-400"></i>
+        </div>
+      </div>
+
+      <!-- Connections -->
+      <div>
+        <div class="text-xs uppercase tracking-widest text-[#949ba4] font-semibold mb-3">Connections</div>
+        <div class="bg-[#2f3136] rounded-2xl p-4 space-y-3 text-sm">
+          <div class="flex items-center gap-3">
+            <i class="fab fa-steam text-[#1b2838] text-2xl"></i>
+            <div>Steam • Connected</div>
+          </div>
+          <div class="flex items-center gap-3">
+            <i class="fab fa-spotify text-[#1DB954] text-2xl"></i>
+            <div>Spotify • Listening</div>
+          </div>
+          <div class="flex items-center gap-3">
+            <i class="fas fa-gamepad text-[#7289da] text-2xl"></i>
+            <div>Battle.net • Connected</div>
+          </div>
         </div>
       </div>
 
@@ -125,63 +162,99 @@
   </div>
 
 <script>
-// Real Discord Badges (using public image URLs - accurate as of 2026)
+// ==================== DATA ====================
+let profile = {
+  displayName: "Your Display Name",
+  username: "yourusername",
+  pronouns: "he/him",
+  avatar: "https://i.pravatar.cc/256?u=default",
+  banner: "https://picsum.photos/id/1015/800/300",
+  bio: "Just a regular Discord user who loves building things ✨",
+  status: "online",
+  joined: "March 12, 2022",
+  selectedBadges: ["nitro", "5year", "early", "dev"]
+};
+
 const allBadges = [
   { id: "nitro", name: "Nitro", img: "https://i.imgur.com/2Q9z2vD.png" },
   { id: "5year", name: "5 Year Nitro", img: "https://i.imgur.com/8z5zZ3k.png" },
-  { id: "early", name: "Early Supporter", img: "https://i.imgur.com/0z0z0z0.png" }, // replace with real if needed
-  { id: "hypesquad", name: "HypeSquad Events", img: "https://i.imgur.com/abc123.png" },
+  { id: "early", name: "Early Supporter", img: "https://discord.com/assets/early-supporter.svg" },
+  { id: "hypesquad", name: "HypeSquad", img: "https://i.imgur.com/hypesquad.png" },
   { id: "partner", name: "Partner", img: "https://i.imgur.com/partner.png" },
   { id: "staff", name: "Discord Staff", img: "https://i.imgur.com/staff.png" },
   { id: "bug", name: "Bug Hunter", img: "https://i.imgur.com/bughunter.png" },
   { id: "dev", name: "Active Developer", img: "https://i.imgur.com/activedev.png" },
-  { id: "mod", name: "Moderator Alumni", img: "https://i.imgur.com/mod.png" },
   { id: "booster", name: "Server Booster", img: "https://i.imgur.com/booster.png" }
 ];
 
-let profile = {
-  displayName: "Your Display Name",
-  username: "yourusername",
-  avatar: "https://i.pravatar.cc/256?u=default",
-  banner: "https://picsum.photos/id/1015/800/300",
-  bio: "Tap to write something about yourself...",
-  status: "online",
-  selectedBadges: ["nitro", "5year", "early"]
-};
+// ==================== RENDER ====================
+function renderProfile() {
+  document.getElementById('display-name').textContent = profile.displayName;
+  document.getElementById('username').textContent = '@' + profile.username;
+  document.getElementById('pronouns').textContent = profile.pronouns;
+  document.getElementById('avatar').src = profile.avatar;
+  document.getElementById('banner').style.backgroundImage = `url('${profile.banner}')`;
+  document.getElementById('bio').textContent = profile.bio;
+  document.getElementById('joined-date').textContent = profile.joined;
+  renderBadges();
+}
 
 function renderBadges() {
   const container = document.getElementById('badges-container');
   container.innerHTML = '';
 
-  profile.selectedBadges.forEach(badgeId => {
+  profile.selectedBadges.forEach((badgeId, index) => {
     const badge = allBadges.find(b => b.id === badgeId);
     if (!badge) return;
-    
+
     const img = document.createElement('img');
     img.src = badge.img;
-    img.className = "badge cursor-pointer hover:scale-110 transition";
+    img.className = "badge cursor-grab active:cursor-grabbing";
     img.title = badge.name;
+    img.draggable = true;
+    img.dataset.index = index;
+    
+    // Drag & Drop
+    img.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', index);
+    });
+    img.addEventListener('dragover', (e) => e.preventDefault());
+    img.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+      const toIndex = parseInt(img.dataset.index);
+      moveBadge(fromIndex, toIndex);
+    });
+
     img.onclick = () => toggleBadge(badgeId);
     container.appendChild(img);
   });
 
-  // Add "Add Badge" button
+  // Add button
   const addBtn = document.createElement('div');
-  addBtn.className = "w-8 h-8 rounded-full border-2 border-dashed border-gray-500 flex items-center justify-center text-gray-400 cursor-pointer hover:border-indigo-400";
+  addBtn.className = "w-8 h-8 rounded-full border-2 border-dashed border-gray-500 flex items-center justify-center text-gray-400 cursor-pointer hover:border-indigo-400 hover:text-indigo-400";
   addBtn.innerHTML = '+';
   addBtn.onclick = showBadgeSelector;
   container.appendChild(addBtn);
 }
 
+function moveBadge(from, to) {
+  const [moved] = profile.selectedBadges.splice(from, 1);
+  profile.selectedBadges.splice(to, 0, moved);
+  renderBadges();
+}
+
+// ==================== MODALS & EDITS ====================
 function showBadgeSelector() {
-  let html = '<div class="grid grid-cols-4 gap-4 p-4">';
+  let html = '<div class="grid grid-cols-4 gap-4 p-5 max-h-[420px] overflow-auto">';
+  
   allBadges.forEach(badge => {
-    const active = profile.selectedBadges.includes(badge.id) ? 'ring-2 ring-indigo-400' : '';
+    const active = profile.selectedBadges.includes(badge.id) ? 'ring-2 ring-indigo-400 scale-110' : '';
     html += `
-      <div onclick="toggleBadge('${badge.id}'); this.closest('.fixed').remove()" 
+      <div onclick="toggleBadge('${badge.id}'); event.stopImmediatePropagation()" 
            class="flex flex-col items-center cursor-pointer">
-        <img src="${badge.img}" class="w-12 h-12 ${active}">
-        <span class="text-[10px] mt-1 text-center">${badge.name}</span>
+        <img src="${badge.img}" class="w-14 h-14 ${active} rounded-full">
+        <span class="text-[10px] mt-1.5 text-center leading-tight">${badge.name}</span>
       </div>`;
   });
   html += '</div>';
@@ -190,9 +263,9 @@ function showBadgeSelector() {
   modal.className = "fixed inset-0 bg-black/80 flex items-center justify-center z-50";
   modal.innerHTML = `
     <div class="bg-[#2f3136] rounded-3xl max-w-xs w-full mx-4 overflow-hidden">
-      <div class="p-4 text-center font-semibold border-b border-gray-700">Select Badges</div>
+      <div class="p-4 text-center font-semibold border-b border-gray-700">Select Badges (Drag to reorder later)</div>
       ${html}
-      <div onclick="this.closest('.fixed').remove()" class="p-4 text-center text-indigo-400 font-medium">Done</div>
+      <div onclick="this.closest('.fixed').remove()" class="p-4 text-center text-indigo-400 font-medium border-t border-gray-700">Done</div>
     </div>`;
   document.body.appendChild(modal);
 }
@@ -206,16 +279,6 @@ function toggleBadge(id) {
   renderBadges();
 }
 
-function renderProfile() {
-  document.getElementById('display-name').textContent = profile.displayName;
-  document.getElementById('username').textContent = '@' + profile.username;
-  document.getElementById('avatar').src = profile.avatar;
-  document.getElementById('banner').style.backgroundImage = `url('${profile.banner}')`;
-  document.getElementById('bio').textContent = profile.bio;
-  renderBadges();
-}
-
-// Editing functions
 function editDisplayName() {
   const val = prompt("Display Name:", profile.displayName);
   if (val) { profile.displayName = val; renderProfile(); }
@@ -223,7 +286,12 @@ function editDisplayName() {
 
 function editUsername() {
   const val = prompt("Username:", profile.username);
-  if (val) { profile.username = val.toLowerCase(); renderProfile(); }
+  if (val) { profile.username = val.toLowerCase().replace(/\s/g, ''); renderProfile(); }
+}
+
+function editPronouns() {
+  const val = prompt("Pronouns (e.g. she/her, they/them):", profile.pronouns);
+  if (val !== null) { profile.pronouns = val; renderProfile(); }
 }
 
 function changeAvatar() {
@@ -247,11 +315,20 @@ function cycleStatus(e) {
   const order = ["online", "idle", "dnd", "invisible"];
   const next = order[(order.indexOf(profile.status) + 1) % 4];
   profile.status = next;
-  document.getElementById('status-dot').className = `absolute bottom-2 right-2 w-8 h-8 rounded-full border-[3px] border-[#36393f] ${colors[next]}`;
+  document.getElementById('status-dot').className = `absolute bottom-2 right-2 w-8 h-8 rounded-full border-[3.5px] border-[#36393f] ${colors[next]}`;
 }
 
-function editProfile() { alert("Edit Profile screen opened (full Nitro customization available in real app)"); }
-function logout() { if(confirm("Log out?")) alert("Logged out"); }
+function showNitroModal() {
+  alert("🚀 Nitro Management Screen\n\nYou have full access to custom themes, animated avatars, bigger uploads, and more!");
+}
+
+function editProfile() {
+  alert("Full Edit Profile screen would open here (with banner, avatar, accent color, etc.)");
+}
+
+function logout() {
+  if(confirm("Log out of Discord?")) alert("👋 Logged out successfully");
+}
 
 // Init
 window.onload = () => {
@@ -260,4 +337,4 @@ window.onload = () => {
 };
 </script>
 </body>
-</html></html></html></html>
+</html></html></html></html></html>
