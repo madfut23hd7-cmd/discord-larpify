@@ -2,182 +2,233 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Friends - Discord</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>You - Discord</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
-    body { background: #36393f; font-family: system-ui, -apple-system, sans-serif; }
-    .discord-bg { background: #36393f; }
-    .card { background: #2f3136; }
-    .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; padding: 1px 6px; border-radius: 4px; }
+    body {
+      background: #36393f;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 428px;
+      margin: 0 auto;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .banner { height: 140px; background: linear-gradient(135deg, #5865f2, #7289da); }
+    .status-dot { width: 18px; height: 18px; border: 3px solid #36393f; }
   </style>
 </head>
-<body class="min-h-screen text-white pb-20">
+<body class="flex flex-col text-white">
 
-  <!-- Top Bar -->
-  <div class="sticky top-0 bg-[#2f3136] border-b border-gray-700 px-4 py-3 flex items-center justify-between z-50">
-    <div class="flex items-center gap-3">
-      <i class="fas fa-user-friends text-indigo-400"></i>
-      <h1 class="font-semibold text-lg">Friends</h1>
+  <!-- Top Status Bar (iOS style) -->
+  <div class="h-11 bg-[#2f3136] flex items-end justify-end px-6 text-xs text-gray-300">
+    <span id="time" class="text-sm">9:41</span>
+  </div>
+
+  <!-- Header -->
+  <div class="bg-[#2f3136] px-4 py-3 flex items-center justify-between border-b border-gray-700">
+    <div class="font-semibold text-xl">You</div>
+    <i onclick="editProfile()" class="fas fa-pen text-lg cursor-pointer"></i>
+  </div>
+
+  <!-- Scrollable Profile Content -->
+  <div class="flex-1 overflow-auto bg-[#36393f]">
+    
+    <!-- Banner + Avatar -->
+    <div class="relative">
+      <div id="banner" onclick="changeBanner()" 
+           class="banner w-full relative">
+        <button onclick="event.stopImmediatePropagation(); changeBanner()" 
+                class="absolute bottom-3 right-3 bg-black/50 px-3 py-1 rounded-full text-xs flex items-center gap-1">
+          <i class="fas fa-camera"></i>
+        </button>
+      </div>
+      
+      <div class="absolute -bottom-12 left-6">
+        <div class="relative">
+          <img id="avatar" onclick="changeAvatar()" 
+               src="https://i.pravatar.cc/256?u=default" 
+               class="w-24 h-24 rounded-full border-4 border-[#36393f] cursor-pointer">
+          <div id="status" onclick="changeStatus()" 
+               class="absolute bottom-1 right-1 w-7 h-7 bg-green-500 rounded-full border-4 border-[#36393f] status-dot cursor-pointer"></div>
+        </div>
+      </div>
     </div>
-    <div class="flex items-center gap-4 text-xl">
-      <i onclick="addFriend()" class="fas fa-user-plus cursor-pointer hover:text-indigo-400"></i>
+
+    <div class="pt-16 pb-6 px-6 space-y-6">
+
+      <!-- Names -->
+      <div>
+        <div onclick="editDisplayName()" id="display-name" 
+             class="text-3xl font-bold cursor-pointer">Your Display Name</div>
+        <div onclick="editUsername()" id="username" 
+             class="text-gray-400 text-lg cursor-pointer">@yourusername</div>
+      </div>
+
+      <!-- Badges -->
+      <div id="badges" class="flex gap-2 flex-wrap">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- About Me -->
+      <div>
+        <div class="uppercase text-xs text-gray-400 font-semibold mb-1">About Me</div>
+        <div onclick="editBio()" id="bio" 
+             class="text-gray-300 text-[15px] leading-relaxed cursor-pointer">
+          Tap to add a bio...
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="grid grid-cols-2 gap-3">
+        <div onclick="fakeAction('Nitro')" 
+             class="bg-[#2f3136] rounded-2xl p-4 cursor-pointer active:scale-95">
+          <i class="fab fa-discord text-indigo-400 text-2xl mb-2"></i>
+          <div class="font-semibold">Nitro</div>
+          <div class="text-xs text-gray-400">Active • Premium</div>
+        </div>
+        <div onclick="fakeAction('Boosting')" 
+             class="bg-[#2f3136] rounded-2xl p-4 cursor-pointer active:scale-95">
+          <i class="fas fa-gem text-purple-400 text-2xl mb-2"></i>
+          <div class="font-semibold">Server Boosting</div>
+          <div class="text-xs text-gray-400">Level 3</div>
+        </div>
+      </div>
+
+      <!-- Account Info -->
+      <div class="space-y-4 text-sm">
+        <div class="flex justify-between items-center py-2 border-b border-gray-700">
+          <span class="text-gray-300">My Account</span>
+          <i class="fas fa-chevron-right text-gray-500"></i>
+        </div>
+        <div class="flex justify-between items-center py-2 border-b border-gray-700">
+          <span class="text-gray-300">Privacy & Safety</span>
+          <i class="fas fa-chevron-right text-gray-500"></i>
+        </div>
+        <div class="flex justify-between items-center py-2 border-b border-gray-700">
+          <span class="text-gray-300">Authorized Apps</span>
+          <i class="fas fa-chevron-right text-gray-500"></i>
+        </div>
+        <div onclick="logout()" class="flex justify-between items-center py-2 text-red-400">
+          <span>Log Out</span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Profile List -->
-  <div class="p-3 space-y-2 max-w-xl mx-auto" id="profile-list">
-    <!-- Populated by JS -->
-  </div>
-
-  <!-- Profile Modal -->
-  <div id="profile-modal" class="hidden fixed inset-0 bg-black/80 flex items-end lg:items-center justify-center z-50">
-    <div class="bg-[#2f3136] w-full max-w-md lg:rounded-xl overflow-hidden">
-      <!-- Modal Content will be injected by JS -->
-    </div>
+  <!-- Bottom Navigation Bar -->
+  <div class="h-14 bg-[#2f3136] border-t border-gray-700 flex items-center justify-around text-2xl">
+    <i class="fas fa-users text-gray-400"></i>
+    <i class="fas fa-compass text-gray-400"></i>
+    <i class="fas fa-inbox text-gray-400"></i>
+    <i class="fas fa-user text-indigo-400"></i>
   </div>
 
 <script>
-// Sample Users with Real Nitro Badges
-const users = [
-  {
-    display: "Alex Chen",
-    username: "alexchen",
-    avatar: "https://i.pravatar.cc/128?u=alex",
-    status: "online",
-    about: "UI Designer & Gamer • Always up for a ranked match",
-    badges: [
-      { emoji: "🔷", label: "Nitro" },
-      { emoji: "🏆", label: "5 Year" },
-      { emoji: "⭐", label: "Early Supporter" },
-      { emoji: "🚀", label: "Server Booster" }
-    ]
-  },
-  {
-    display: "Mia Rodriguez",
-    username: "miarose",
-    avatar: "https://i.pravatar.cc/128?u=mia",
-    status: "idle",
-    about: "Digital artist & cat mom 🐱",
-    badges: [
-      { emoji: "🔷", label: "Nitro" },
-      { emoji: "🏆", label: "5 Year" }
-    ]
-  },
-  {
-    display: "Kai Nakamura",
-    username: "kainaka",
-    avatar: "https://i.pravatar.cc/128?u=kai",
-    status: "dnd",
-    about: "FPS Grinder | Valorant & CS2",
-    badges: [
-      { emoji: "⭐", label: "Early Supporter" },
-      { emoji: "🚀", label: "Server Booster" }
-    ]
-  },
-  {
-    display: "Luna Park",
-    username: "lunarp",
-    avatar: "https://i.pravatar.cc/128?u=luna",
-    status: "online",
-    about: "Streaming & chill vibes",
-    badges: [
-      { emoji: "🔷", label: "Nitro" },
-      { emoji: "🏆", label: "5 Year" },
-      { emoji: "⭐", label: "Early Supporter" }
-    ]
+// Current Profile Data
+let profile = {
+  displayName: "Your Display Name",
+  username: "yourusername",
+  avatar: "https://i.pravatar.cc/256?u=default",
+  banner: "https://picsum.photos/id/1015/800/300",
+  bio: "Tap to add a bio...",
+  status: "online",
+  badges: [
+    { emoji: "🔷", label: "Nitro" },
+    { emoji: "🏆", label: "5 Year" },
+    { emoji: "⭐", label: "Early Supporter" },
+    { emoji: "🚀", label: "Booster" }
+  ]
+};
+
+function renderProfile() {
+  document.getElementById('display-name').textContent = profile.displayName;
+  document.getElementById('username').textContent = '@' + profile.username;
+  document.getElementById('avatar').src = profile.avatar;
+  document.getElementById('banner').style.background = `url('${profile.banner}') center/cover`;
+  document.getElementById('bio').textContent = profile.bio;
+
+  // Render badges
+  const badgesContainer = document.getElementById('badges');
+  badgesContainer.innerHTML = profile.badges.map(b => `
+    <div class="bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+      ${b.emoji} ${b.label}
+    </div>
+  `).join('');
+}
+
+function editDisplayName() {
+  const newName = prompt("New Display Name:", profile.displayName);
+  if (newName) {
+    profile.displayName = newName;
+    renderProfile();
   }
-];
-
-function getStatusColor(status) {
-  if (status === "online") return "bg-green-500";
-  if (status === "idle") return "bg-yellow-500";
-  if (status === "dnd") return "bg-red-500";
-  return "bg-gray-500";
 }
 
-function renderProfiles() {
-  const container = document.getElementById('profile-list');
-  container.innerHTML = '';
-
-  users.forEach((user, index) => {
-    const div = document.createElement('div');
-    div.className = `card rounded-xl p-4 flex gap-4 items-center cursor-pointer active:scale-95 transition`;
-    div.innerHTML = `
-      <div class="relative">
-        <img src="${user.avatar}" class="w-14 h-14 rounded-full ring-2 ring-gray-700">
-        <div class="absolute bottom-0 right-0 w-5 h-5 rounded-full border-2 border-[#2f3136] ${getStatusColor(user.status)}"></div>
-      </div>
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2">
-          <span class="font-semibold text-lg truncate">${user.display}</span>
-        </div>
-        <div class="text-gray-400 text-sm">@${user.username}</div>
-        <div class="flex gap-1 mt-2 flex-wrap">
-          ${user.badges.map(b => `
-            <span class="badge bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-              ${b.emoji} ${b.label}
-            </span>
-          `).join('')}
-        </div>
-      </div>
-    `;
-    div.onclick = () => showProfile(user);
-    container.appendChild(div);
-  });
+function editUsername() {
+  const newUser = prompt("New Username (no @):", profile.username);
+  if (newUser) {
+    profile.username = newUser.toLowerCase().replace(/\s/g, '');
+    renderProfile();
+  }
 }
 
-function showProfile(user) {
-  const modal = document.getElementById('profile-modal');
-  modal.classList.remove('hidden');
+function changeAvatar() {
+  const url = prompt("Paste new avatar image URL:", profile.avatar);
+  if (url) {
+    profile.avatar = url;
+    renderProfile();
+  }
+}
+
+function changeBanner() {
+  const url = prompt("Paste new banner image URL:", profile.banner);
+  if (url) {
+    profile.banner = url;
+    renderProfile();
+  }
+}
+
+function editBio() {
+  const newBio = prompt("Edit your bio:", profile.bio);
+  if (newBio !== null) {
+    profile.bio = newBio || "Tap to add a bio...";
+    renderProfile();
+  }
+}
+
+function changeStatus() {
+  const statuses = ["online", "idle", "dnd", "invisible"];
+  const colors = {online: "bg-green-500", idle: "bg-yellow-500", dnd: "bg-red-500", invisible: "bg-gray-500"};
   
-  const content = modal.querySelector('div');
-  content.innerHTML = `
-    <div class="h-28 bg-gradient-to-r from-indigo-600 to-purple-600 relative">
-      <button onclick="closeModal()" class="absolute top-3 right-3 text-white text-2xl">✕</button>
-    </div>
-    
-    <div class="px-5 -mt-10 relative">
-      <img src="${user.avatar}" class="w-24 h-24 rounded-full border-4 border-[#2f3136]">
-      
-      <div class="mt-3">
-        <div class="flex items-center gap-2">
-          <span class="font-bold text-2xl">${user.display}</span>
-        </div>
-        <div class="text-gray-400">@${user.username}</div>
-      </div>
-
-      <div class="flex gap-2 mt-4 flex-wrap">
-        ${user.badges.map(b => `
-          <span class="badge bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm py-1 px-3">
-            ${b.emoji} ${b.label}
-          </span>
-        `).join('')}
-      </div>
-
-      <div class="mt-6">
-        <p class="text-gray-300 text-sm">${user.about}</p>
-      </div>
-
-      <div class="mt-8 grid grid-cols-2 gap-3 pb-8">
-        <button onclick="closeModal()" class="py-3 bg-[#40444b] rounded-xl font-medium">Message</button>
-        <button onclick="closeModal()" class="py-3 bg-[#40444b] rounded-xl font-medium">Add Friend</button>
-      </div>
-    </div>
-  `;
+  const currentIndex = statuses.indexOf(profile.status);
+  const next = statuses[(currentIndex + 1) % statuses.length];
+  
+  profile.status = next;
+  document.getElementById('status').className = `absolute bottom-1 right-1 w-7 h-7 rounded-full border-4 border-[#36393f] status-dot ${colors[next]}`;
 }
 
-function closeModal() {
-  document.getElementById('profile-modal').classList.add('hidden');
+function fakeAction(action) {
+  alert(`Opening ${action} settings... (Spoofer Demo)`);
 }
 
-function addFriend() {
-  alert("Friend request feature coming soon! 👀");
+function editProfile() {
+  alert("Full profile editor opened!\n\nYou can now edit everything above by tapping on them.");
+}
+
+function logout() {
+  if (confirm("Log out of this account?")) {
+    alert("Logged out (demo)");
+  }
 }
 
 // Initialize
-window.onload = renderProfiles;
+window.onload = () => {
+  renderProfile();
+  // Fake iOS time
+  document.getElementById('time').textContent = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+};
 </script>
 </body>
-</html></html>
+</html></html></html>
